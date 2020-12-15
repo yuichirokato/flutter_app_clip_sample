@@ -1,16 +1,25 @@
 import UIKit
 import Flutter
 
+enum MethodName: String {
+    case getURL = "getUrl"
+}
+
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
-    private let channelName = "flutterappclips/launchevents"
+    private let eventChannelName = "flutterappclips/events"
+    private let methodChannleName = "flutterappclips/method"
+    private let initialURL = URL(string: "https://flutter.memo.com/home")!
 
     private var flutterViewController: FlutterViewController {
         return self.window.rootViewController as! FlutterViewController
     }
 
     private lazy var eventChannel: FlutterEventChannel = {
-        FlutterEventChannel(name: channelName, binaryMessenger: flutterViewController.binaryMessenger)
+        FlutterEventChannel(name: eventChannelName, binaryMessenger: flutterViewController.binaryMessenger)
+    }()
+    private lazy var methodChannel: FlutterMethodChannel = {
+        FlutterMethodChannel(name: methodChannleName, binaryMessenger: flutterViewController.binaryMessenger)
     }()
     private var incomingURL: URL?
     private var eventSink: FlutterEventSink?
@@ -19,6 +28,21 @@ import Flutter
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+
+        methodChannel.setMethodCallHandler { [weak self] call, result in
+            guard call.method == MethodName.getURL.rawValue else {
+                result(FlutterMethodNotImplemented)
+                return
+            }
+
+            guard let targetURL = self?.incomingURL else {
+                result(FlutterError(code: "NOTFOUND", message: "url not found", details: nil))
+                return
+            }
+
+            result(targetURL.absoluteString)
+        }
+
         GeneratedPluginRegistrant.register(with: self)
 
         eventChannel.setStreamHandler(self)

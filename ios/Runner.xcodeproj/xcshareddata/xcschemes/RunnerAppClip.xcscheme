@@ -73,7 +73,7 @@
       <EnvironmentVariables>
          <EnvironmentVariable
             key = "_XCAppClipURL"
-            value = "https://flutter.memo.com?memo_id=200"
+            value = "https://flutter.memo.com/edit?id=200"
             isEnabled = "YES">
          </EnvironmentVariable>
       </EnvironmentVariables>

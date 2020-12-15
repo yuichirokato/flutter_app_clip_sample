@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_app_clips/models/experience_handler.dart';
 import 'package:flutter_app_clips/models/memo.dart';
+import 'package:flutter_app_clips/screens/loading_screen.dart';
 import 'package:flutter_app_clips/screens/memo_edit_screen.dart';
 import 'package:flutter_app_clips/screens/memo_list_screen.dart';
 
@@ -10,33 +11,13 @@ void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: MemoListScreen(),
-      routes: <String, WidgetBuilder>{
-        '/home': (context) => MemoListScreen(),
-        '/edit': (context) {
-          final memo = Memo(title: '買い物リスト', body: '- 牛乳\n- 卵\n- ちくわ');
-          return MemoEditScreen(memo: memo);
-        }
-      },
-    );
-  }
+  _MyAppState createState() => _MyAppState();
 }
 
-class HomeScreen extends StatefulWidget {
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  static const _eventChannel =
-      const EventChannel('flutterappclips/launchevents');
+class _MyAppState extends State<MyApp> {
   StreamSubscription _streamSubscription;
-  String _platformMessage;
 
   @override
   void initState() {
@@ -46,15 +27,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Flutter with app clip sample'),
-      ),
-      body: Container(
-        child: Center(
-          child: Text(_platformMessage ?? 'initial message!'),
-        ),
-      ),
+    return MaterialApp(
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: LoadingScreen(),
+      routes: <String, WidgetBuilder>{
+        '/home': (context) => MemoListScreen(),
+        '/edit': (context) {
+          final memo = Memo(title: '買い物リスト', body: '- 牛乳\n- 卵\n- ちくわ');
+          return MemoEditScreen(memo: memo);
+        }
+      },
     );
   }
 
@@ -65,8 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _enableEventReceiver() {
-    _streamSubscription =
-        _eventChannel.receiveBroadcastStream().listen((event) {
+    _streamSubscription = getEventStream().listen((event) {
       Navigator.pushReplacementNamed(context, '/edit');
     }, onError: (error) {
       print('Received error: ${error.message}');
